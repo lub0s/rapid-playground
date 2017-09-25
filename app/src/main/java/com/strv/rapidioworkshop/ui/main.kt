@@ -1,7 +1,8 @@
-package com.strv.rapidioworkshop
+package com.strv.rapidioworkshop.ui
 
 import android.arch.lifecycle.ViewModel
 import android.support.v7.app.AppCompatActivity
+import com.strv.rapidioworkshop.R
 import com.strv.rapidioworkshop.databinding.ActivityMainBinding
 import com.strv.rapidioworkshop.vmbk.vmb
 

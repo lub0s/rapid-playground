@@ -5,11 +5,11 @@
 
 		<variable
 			name="view"
-			type="com.strv.rapidioworkshop.MainView" />
+			type="com.strv.rapidioworkshop.ui.MainView" />
 
 		<variable
 			name="viewModel"
-			type="com.strv.rapidioworkshop.MainViewModel" />
+			type="com.strv.rapidioworkshop.ui.MainViewModel" />
 	</data>
 
 	<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
