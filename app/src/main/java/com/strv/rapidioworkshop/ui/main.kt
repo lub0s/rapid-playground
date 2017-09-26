@@ -1,29 +1,60 @@
 package com.strv.rapidioworkshop.ui
 
+import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModel
+import android.databinding.ObservableField
 import android.os.Bundle
 import android.support.v4.content.ContextCompat
 import android.support.v4.graphics.drawable.DrawableCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.MenuItem
+import android.widget.Toast
+import com.strv.rapidioworkshop.BR
 import com.strv.rapidioworkshop.R
+import com.strv.rapidioworkshop.data.Channel
 import com.strv.rapidioworkshop.databinding.ActivityMainBinding
+import com.strv.rapidioworkshop.utils.SingleLiveData
 import com.strv.rapidioworkshop.utils.vmb
+import io.rapid.Rapid
+import io.rapid.RapidDocument
+import me.tatarka.bindingcollectionadapter2.ItemBinding
 
 interface MainView {
-
+    val channelItemBinding: ItemBinding<RapidDocument<Channel>>
 }
 
-class MainActivity : AppCompatActivity(), MainView {
+interface ChannelClick {
+    fun channelClick(channelId: String)
+}
+
+class MainActivity : AppCompatActivity(), MainView, ChannelClick {
+
     val vmb = vmb<MainViewModel, ActivityMainBinding>(R.layout.activity_main)
     private lateinit var drawerToggle: ActionBarDrawerToggle
 
+    override val channelItemBinding =
+        ItemBinding.of<RapidDocument<Channel>>(BR.channel, R.layout.item_channel)
+            .bindExtra(BR.listener, this)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setupDrawer()
+
+        vmb.viewModel.displayMessage.observe(this, Observer {
+            Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
+        })
+    }
+
+    override fun channelClick(channelId: String) {
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.container, ChannelFragment(channelId))
+            .commit()
+
+        vmb.binding.drawerLayout.closeDrawers()
+        supportActionBar?.title = "#$channelId"
     }
 
     private fun setupDrawer() {
@@ -43,5 +74,29 @@ class MainActivity : AppCompatActivity(), MainView {
 }
 
 class MainViewModel : ViewModel() {
+
+    val displayMessage = SingleLiveData<String>()
+
+    val collection get() = Rapid.getInstance().collection("channels", Channel::class.java)
+
+    val channels = ObservableField<List<RapidDocument<Channel>>>(emptyList())
+    val newChannelName = ObservableField<String>("")
+
+    init  {
+        collection
+            .subscribe(channels::set)
+            .onError { Log.e("Error", "Error MainViewModel") }
+    }
+
+
+    fun newChannelClick() {
+        collection.document(newChannelName.get())
+            .mutate(Channel())
+            .onSuccess {
+                displayMessage.value = "Yeah!"
+                newChannelName.set("")
+            }
+            .onError { displayMessage.value = it.message ?: "Error adding" }
+    }
 
 }
