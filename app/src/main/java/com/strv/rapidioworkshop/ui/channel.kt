@@ -15,6 +15,7 @@ import com.strv.rapidioworkshop.databinding.FragmentChannelBinding
 import com.strv.rapidioworkshop.utils.vmb
 import io.rapid.Rapid
 import io.rapid.RapidDocument
+import io.rapid.RapidMutateOptions
 import me.tatarka.bindingcollectionadapter2.ItemBinding
 import me.tatarka.bindingcollectionadapter2.collections.DiffObservableList
 
@@ -71,7 +72,8 @@ class ChannelViewModel(val channelId: String): ViewModel() {
 
     fun sendMessage() {
         collection.newDocument().mutate(
-            Message(newMessageText.get(), channelId, "sdf", System.currentTimeMillis())
+            Message(newMessageText.get(), channelId, "sdf", -1L),
+            RapidMutateOptions.Builder().fillPropertyWithServerTimestamp("timestamp").build()
         )
 
         newMessageText.set("")

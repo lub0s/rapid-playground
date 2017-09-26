@@ -1,5 +1,6 @@
 package com.strv.rapidioworkshop.ui
 
+import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModel
 import android.databinding.ObservableField
@@ -15,10 +16,12 @@ import com.strv.rapidioworkshop.BR
 import com.strv.rapidioworkshop.R
 import com.strv.rapidioworkshop.data.Channel
 import com.strv.rapidioworkshop.databinding.ActivityMainBinding
+import com.strv.rapidioworkshop.utils.LifecycleReceiver
 import com.strv.rapidioworkshop.utils.SingleLiveData
 import com.strv.rapidioworkshop.utils.vmb
 import io.rapid.Rapid
 import io.rapid.RapidDocument
+import io.rapid.lifecycle.RapidLiveData
 import me.tatarka.bindingcollectionadapter2.ItemBinding
 
 interface MainView {
@@ -73,7 +76,7 @@ class MainActivity : AppCompatActivity(), MainView, ChannelClick {
     }
 }
 
-class MainViewModel : ViewModel() {
+class MainViewModel : ViewModel(), LifecycleReceiver {
 
     val displayMessage = SingleLiveData<String>()
 
@@ -82,12 +85,11 @@ class MainViewModel : ViewModel() {
     val channels = ObservableField<List<RapidDocument<Channel>>>(emptyList())
     val newChannelName = ObservableField<String>("")
 
-    init  {
-        collection
-            .subscribe(channels::set)
-            .onError { Log.e("Error", "Error MainViewModel") }
+    override fun onLifecycleReady(lifecycleOwner: LifecycleOwner) {
+        RapidLiveData.from(collection).observe(lifecycleOwner, Observer {
+            channels.set(it)
+        })
     }
-
 
     fun newChannelClick() {
         collection.document(newChannelName.get())
