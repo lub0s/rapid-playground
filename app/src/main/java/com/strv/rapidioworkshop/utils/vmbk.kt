@@ -1,4 +1,4 @@
-package com.strv.rapidioworkshop.vmbk
+package com.strv.rapidioworkshop.utils
 
 import android.app.Activity
 import android.arch.lifecycle.*
